@@ -18,10 +18,10 @@ jobs:
       run: |
         cd example
         terraform init -upgrade=true -reconfigure \
-          -backend-config="key=terraform-azurerm-resource-group/terraform.tfstate" \
+          -backend-config="key=${GITHUB_REPOSITORY#*\/}/terraform.tfstate" \
           -backend-config="container_name=tfstate" \
-          -backend-config="storage_account_name=terraformstateinfo" \
-          -backend-config="resource_group_name=Terraform"
+          -backend-config="storage_account_name=${{ secrets.tf_sa_name }}" \
+          -backend-config="resource_group_name=${{ secrets.tf_rg_name }}"
       env:
         ARM_CLIENT_ID: ${{ secrets.AZURE_AD_CLIENT_ID }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID}}
