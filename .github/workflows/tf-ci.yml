@@ -15,7 +15,7 @@ jobs:
       with:
         terraform_version: 1.2.8
 
-    - name: Initialize Terraform and Upgrade modules
+    - name: Initialize TF and Upgrade modules
       id: init
       run: |
         terraform init -upgrade=true -reconfigure \
@@ -30,12 +30,12 @@ jobs:
         ARM_CLIENT_SECRET: ${{ secrets.AZURE_AD_CLIENT_S }}
       working-directory: ${{ env.working-directory }}
 
-    - name: Terraform Validate
+    - name: TF Validate
       id: validate
       run: terraform validate
       working-directory: ${{ env.working-directory }}
 
-    - name: Terraform Plan
+    - name: TF Plan
       id: plan
       run: terraform plan
       env:
