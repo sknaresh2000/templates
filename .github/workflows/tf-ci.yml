@@ -18,7 +18,6 @@ jobs:
     - name: Initialize Terraform and Upgrade modules
       id: init
       run: |
-        echo github.ref
         terraform init -upgrade=true -reconfigure \
           -backend-config="key=${GITHUB_REPOSITORY#*\/}/terraform.tfstate" \
           -backend-config="container_name=tfstate" \
