@@ -1,0 +1,52 @@
+name: CD
+on:
+  workflow_call:
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    env:
+      working-directory: example
+    if: github.ref == 'refs/head/main'
+
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+
+    - uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.2.8
+
+    - name: Initialize Terraform and Upgrade modules
+      id: init
+      run: |
+        terraform init -upgrade=true -reconfigure \
+          -backend-config="key=${GITHUB_REPOSITORY#*\/}/terraform.tfstate" \
+          -backend-config="container_name=tfstate" \
+          -backend-config="storage_account_name=${{ secrets.TF_SA_NAME }}" \
+          -backend-config="resource_group_name=${{ secrets.TF_RG_NAME }}"
+      env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_AD_CLIENT_ID }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID}}
+        ARM_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_AD_CLIENT_S }}
+      working-directory: ${{ env.working-directory }}
+
+    - name: Terraform Apply
+      id: apply
+      run: terraform apply
+      env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_AD_CLIENT_ID }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID}}
+        ARM_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_AD_CLIENT_S }}
+      working-directory: ${{ env.working-directory }}
+
+    - name: Terraform Destroy
+      id: destroy
+      run: terraform destroy
+      env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_AD_CLIENT_ID }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID}}
+        ARM_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_AD_CLIENT_S }}
+      working-directory: ${{ env.working-directory }}
