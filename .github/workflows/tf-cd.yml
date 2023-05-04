@@ -2,7 +2,7 @@ name: CD
 on:
   workflow_call:
 jobs:
-  ci:
+  cd:
     runs-on: ubuntu-latest
     env:
       working-directory: example
