@@ -1,4 +1,4 @@
-name: CI
+name: TF-VAULT-REUSABLE-WORKFLOW
 on:
   workflow_call:
 jobs:
@@ -22,9 +22,9 @@ jobs:
     - name: Retrieve details from Runner Mananged Identity
       id: mi
       run: |
-        echo "jwt=$(curl -s 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fmanagement.azure.com%2F' -H Metadata:true | jq -r '.access_token')" >> $GITHUB_OUTPUT
-        echo "rg_name=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-08-01" | jq -r '.compute | .resourceGroupName')" >> $GITHUB_OUTPUT
-        echo "vm_name=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-08-01" | jq -r '.compute | .name')" >> $GITHUB_OUTPUT
+        echo "jwt=$(curl -s 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2021-12-13&resource=https%3A%2F%2Fmanagement.azure.com%2F' -H Metadata:true | jq -r '.access_token')" >> $GITHUB_OUTPUT
+        echo "rg_name=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2021-12-13" | jq -r '.compute | .resourceGroupName')" >> $GITHUB_OUTPUT
+        echo "vm_name=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2021-12-13" | jq -r '.compute | .name')" >> $GITHUB_OUTPUT
 
     - name: Retrieve Azure Creds
       id: get-creds
