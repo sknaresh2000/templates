@@ -28,8 +28,7 @@ jobs:
       uses: hashicorp/vault-action@v2
       with:
         url: http://${{ secrets.VAULT_ADDR }}:8200
-        role: ${{ secrets.VAULT_ROLE}}
-        authPayload: '{"jwt" : "${{ steps.jwt.outputs.jwt }}" }'
+        authPayload: '{"role" : "${{ secrets.VAULT_ROLE}}", "jwt" : "${{ steps.jwt.outputs.jwt }}" }'
         method: azure
         secrets: |
             azurer/creds/Hashicorp-Vault client_id | ARM_CLIENT_ID ;
