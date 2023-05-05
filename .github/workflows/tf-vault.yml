@@ -2,7 +2,7 @@ name: CI
 on:
   workflow_call:
 jobs:
-  ci:
+  tf_module_example:
     runs-on: self-hosted
     env:
       working-directory: example
@@ -70,7 +70,7 @@ jobs:
     - name: TF Apply
       id: apply
       run: terraform apply -auto-approve
-      if: ${{ github.ref == 'ref/heads/main' }}
+      if: github.ref == 'ref/heads/main'
       env:
         ARM_CLIENT_ID: ${{ steps.get-creds.outputs.ARM_CLIENT_ID }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID}}
@@ -81,7 +81,7 @@ jobs:
     - name: TF Destroy
       id: destroy
       run: terraform destroy -auto-approve
-      if: ${{ github.ref == 'ref/heads/main' }}
+      if: github.ref == 'ref/heads/main'
       env:
         ARM_CLIENT_ID: ${{ steps.get-creds.outputs.ARM_CLIENT_ID }}
         ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID}}
