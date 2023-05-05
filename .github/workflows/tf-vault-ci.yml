@@ -24,13 +24,14 @@ jobs:
       run: |
         echo "jwt=$(curl -s 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fmanagement.azure.com%2F' -H Metadata:true | jq -r '.access_token')" >> $GITHUB_OUTPUT
         echo "rg_name=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-08-01" | jq -r '.compute | .resourceGroupName')" >> $GITHUB_OUTPUT
+        echo "vm_name=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-08-01" | jq -r '.compute | .name')" >> $GITHUB_OUTPUT
 
     - name: Retrieve Creds
       id: get-creds
       uses: hashicorp/vault-action@v2
       with:
         url: http://${{ secrets.VAULT_ADDR }}:8200
-        authPayload: '{"resource_group_name" : "${{ steps.mi.outputs.rg_name }}", "subscription_id" : "${{ secrets.AZURE_SUBSCRIPTION_ID}}", "role" : "${{ secrets.VAULT_ROLE}}", "jwt" : "${{ steps.mi.outputs.jwt }}" }'
+        authPayload: '{"resource_group_name" : "${{ steps.mi.outputs.rg_name }}", "vm_name" : "${{ steps.mi.outputs.vm_name }}", "subscription_id" : "${{ secrets.AZURE_SUBSCRIPTION_ID}}", "role" : "${{ secrets.VAULT_ROLE}}", "jwt" : "${{ steps.mi.outputs.jwt }}" }'
         method: azure
         secrets: |
             azurer/creds/Hashicorp-Vault client_id | ARM_CLIENT_ID ;
