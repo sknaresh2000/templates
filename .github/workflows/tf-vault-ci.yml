@@ -1,0 +1,62 @@
+name: CI
+on:
+  workflow_call:
+jobs:
+  ci:
+    runs-on: self-hosted
+    env:
+      working-directory: example
+
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+        
+    - uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.2.8
+
+    - name: Retrieve Creds
+      id: get-creds
+      uses: hashicorp/vault-action@v2
+      with:
+        url: http://${{ secrets.VAULT_ADDR }}:8200
+        role: ${{ secrets.VAULT_ROLE}}
+        authPayload: '{"jwt" : ""$(curl -s "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fmanagement.azure.com%2F" -H Metadata:true | jq -r ".access_token")" subscription_id=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-08-01" | jq -r ".compute | .subscriptionId") resource_group_name=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-08-01" | jq -r ".compute | .resourceGroupName")  vm_name=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-08-01" | jq -r ".compute | .name")"  }'
+        method: azure
+        secrets: |
+            azurer/creds/Hashicorp-Vault client_id | ARM_CLIENT_ID ;
+            azurer/creds/Hashicorp-Vault client_secret | ARM_CLIENT_SECRET ;
+
+    - name: Initialize TF and Upgrade modules
+      id: init
+      run: |
+        terraform init -upgrade=true -reconfigure \
+          -backend-config="key=${GITHUB_REPOSITORY#*\/}/terraform.tfstate" \
+          -backend-config="container_name=tfstate" \
+          -backend-config="storage_account_name=${{ secrets.TF_SA_NAME }}" \
+          -backend-config="resource_group_name=${{ secrets.TF_RG_NAME }}"
+      env:
+        ARM_CLIENT_ID: ${{ steps.get-creds.outputs.ARM_CLIENT_ID }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID}}
+        ARM_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
+        ARM_CLIENT_SECRET: ${{ steps.get-creds.outputs.ARM_CLIENT_SECRET }}
+      working-directory: ${{ env.working-directory }}
+
+    - name: TF Validate
+      id: validate
+      run: terraform validate
+      working-directory: ${{ env.working-directory }}
+
+    - name: TF Plan
+      id: plan
+      run: terraform plan
+      env:
+        ARM_CLIENT_ID: ${{ steps.get-creds.outputs.ARM_CLIENT_ID }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID}}
+        ARM_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
+        ARM_CLIENT_SECRET: ${{ steps.get-creds.outputs.ARM_CLIENT_SECRET }}
+      working-directory: ${{ env.working-directory }}
