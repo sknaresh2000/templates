@@ -34,8 +34,8 @@ jobs:
         authPayload: '{"resource_group_name" : "${{ steps.mi.outputs.rg_name }}", "vm_name" : "${{ steps.mi.outputs.vm_name }}", "subscription_id" : "${{ secrets.AZURE_SUBSCRIPTION_ID}}", "role" : "${{ secrets.VAULT_ROLE}}", "jwt" : "${{ steps.mi.outputs.jwt }}" }'
         method: azure
         secrets: |
-            azurer/creds/Hashicorp-Vault client_id | ARM_CLIENT_ID ;
-            azurer/creds/Hashicorp-Vault client_secret | ARM_CLIENT_SECRET ;
+            azure/creds/Hashicorp-Vault client_id | ARM_CLIENT_ID ;
+            azure/creds/Hashicorp-Vault client_secret | ARM_CLIENT_SECRET ;
 
     - name: Initialize TF and Upgrade modules
       id: init
